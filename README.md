@@ -52,7 +52,7 @@ bash standalone/install.sh uninstall
 概率由 **Codex Reset Observatory（Gussuri Works）** 提供。它估算额外重置事件，可能包含直接恢复额度或发放重置卡。请在原生 Usage 中查看个人额度和常规重置时间。社区估算仅供参考。 [观测站](https://codex.gussuriworks.com/zh) · [公开 API 文档](https://github.com/gussuri/codex-reset-observatory#public-api)
 
 - **界面**仅查找桌面端导航栏与 Usage 入口以定位按钮，并绘制预测面板。代码不读取对话、账户额度或登录凭据。
-- **Node 后台**以当前系统用户运行。Tweaks 安装方式由宿主按版本授权，独立方式通过 macOS 用户级启动任务运行。上游未开放浏览器跨域访问，包通过 Node 向 `codex.gussuriworks.com/api/current?locale=zh` 请求公开 JSON，无需账号或 API 密钥。正常情况下成功请求至少相隔 10 分钟，失败后按需重试。
+- **Node 后台**以当前系统用户运行。Tweaks 安装方式由宿主按版本授权，独立方式通过 macOS 用户级启动任务运行。上游未开放浏览器跨域访问，包通过 Node 向 `codex.gussuriworks.com/api/current?locale=zh` 请求公开 JSON，无需账号或 API 密钥。窗口可见时每分钟检查是否需要刷新。成功请求至少相隔 10 分钟，失败后约 1 分钟可重试。
 - **本地数据**只在所选安装方式的数据目录中保存显示时段（`settings.json`）。预测快照仅缓存在内存中。
 
 ## 开发

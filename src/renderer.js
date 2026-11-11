@@ -8,7 +8,8 @@ export function createRenderer({ DEFAULT_HORIZON, HORIZONS }) {
     'button[aria-description][aria-haspopup="menu"]'
   ].join(", ");
   const SOURCE = "https://codex.gussuriworks.com/zh";
-  const REFRESH_INTERVAL = 10 * 60_000;
+  // The Node backend controls network cadence and short retries after failures.
+  const REFRESH_CHECK_INTERVAL = 60_000;
   const timeOptions = {
     timeZone: "Asia/Shanghai",
     hour: "2-digit",
@@ -344,7 +345,7 @@ export function createRenderer({ DEFAULT_HORIZON, HORIZONS }) {
     });
     observer.observe(document.body, { childList: true, subtree: true });
     mount();
-    const timer = setInterval(() => { if (!document.hidden) void refresh(); }, REFRESH_INTERVAL);
+    const timer = setInterval(() => { if (!document.hidden) void refresh(); }, REFRESH_CHECK_INTERVAL);
 
     onCleanup(() => {
       disposed = true;
