@@ -1,0 +1,264 @@
+.ct-reset-forecast-trigger,
+.ct-reset-forecast-panel {
+  --rf-text: var(--color-text-primary, CanvasText);
+  --rf-muted: var(--color-text-tertiary, GrayText);
+  --rf-hover: var(--color-background-primary-ghost-hover, color-mix(in srgb, CanvasText 8%, transparent));
+  --rf-focus: var(--color-ring, Highlight);
+  -webkit-app-region: no-drag;
+  font-family: inherit;
+  font-variant-numeric: tabular-nums;
+}
+
+.ct-reset-forecast-trigger {
+  position: relative;
+  display: grid;
+  flex: 0 0 auto;
+  place-content: center;
+  gap: 1px;
+  inline-size: 36px;
+  block-size: 36px;
+  box-sizing: border-box;
+  padding: 0;
+  border: 0;
+  border-radius: var(--control-radius-lg, 12.5px);
+  background: transparent;
+  color: var(--rf-muted);
+  text-align: center;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.ct-reset-forecast-trigger:hover,
+.ct-reset-forecast-trigger[aria-expanded="true"] {
+  background: var(--rf-hover);
+  color: var(--rf-text);
+}
+
+.ct-reset-forecast-trigger:focus-visible,
+.ct-reset-forecast-panel a:focus-visible {
+  outline: 2px solid var(--rf-focus);
+  outline-offset: -2px;
+}
+
+.ct-reset-forecast-trigger .ct-reset-forecast-horizon { font-size: 9px; }
+.ct-reset-forecast-trigger strong { font-size: 11px; font-weight: 500; }
+
+.ct-reset-forecast-trigger[data-notice="true"]::after {
+  position: absolute;
+  inset-block-start: 4px;
+  inset-inline-end: 4px;
+  inline-size: 5px;
+  block-size: 5px;
+  border-radius: 50%;
+  background: var(--color-text-warning-surface, currentColor);
+  content: "";
+}
+
+.ct-reset-forecast-panel {
+  position: fixed;
+  inset: auto;
+  box-sizing: border-box;
+  inline-size: min(calc(var(--spacing, 4px) * 65), calc(100vw - 16px));
+  max-block-size: calc(100vh - 16px);
+  margin: 0;
+  padding: var(--app-menu-gutter, var(--spacing, 4px));
+  overflow: auto;
+  overscroll-behavior: contain;
+  outline: none;
+  border: 0;
+  border-radius: var(--menu-radius, 20px);
+  color: var(--rf-text);
+  background: color-mix(in oklab, var(--color-surface-elevated-secondary, Canvas) 90%, transparent);
+  box-shadow:
+    0 0 0 var(--dropdown-overlay-ring-width, .5px) var(--color-border-overlay, transparent),
+    var(--shadow-dropdown-overlay, 0 8px 16px -4px #0002);
+  backdrop-filter: blur(var(--blur-sm, 8px));
+  font-size: var(--menu-font-size, 13px);
+  line-height: calc(var(--spacing, 4px) * 5);
+  font-weight: inherit;
+}
+
+.ct-reset-forecast-panel[popover]:not(:popover-open),
+.ct-reset-forecast-panel [hidden] { display: none; }
+
+.ct-reset-forecast-panel .ct-reset-forecast-caption {
+  margin: 0;
+  padding: var(--menu-item-content-padding, 4px 8px);
+  color: var(--rf-muted);
+  font: inherit;
+  overflow-wrap: anywhere;
+}
+
+.ct-reset-forecast-heading {
+  padding: 5px var(--padding-row-x, 8px) 4px;
+}
+
+.ct-reset-forecast-heading h2,
+.ct-reset-forecast-settings-header h2 {
+  margin: 0;
+  font: inherit;
+  font-weight: 550;
+}
+
+.ct-reset-forecast-heading p {
+  margin: 0;
+  color: var(--rf-muted);
+  font-size: .885em;
+}
+
+.ct-reset-forecast-metadata {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0 var(--padding-row-x, 8px);
+  padding: var(--menu-item-content-padding, 4px 8px);
+  color: var(--rf-muted);
+  font-size: .885em;
+}
+
+.ct-reset-forecast-metadata a {
+  margin-inline-start: auto;
+  color: var(--color-text-secondary, var(--rf-text));
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.ct-reset-forecast-metadata a:hover,
+.ct-reset-forecast-metadata a:focus-visible {
+  color: var(--rf-text);
+  text-decoration: underline;
+}
+
+.ct-reset-forecast-selected {
+  display: flex;
+  align-items: center;
+  gap: var(--menu-item-gap, 6px);
+  color: var(--color-text-secondary, var(--rf-text));
+  white-space: nowrap;
+}
+
+.ct-reset-forecast-settings-header {
+  display: flex;
+  align-items: center;
+  min-block-size: 35px;
+  gap: 5px;
+  padding: 3px var(--padding-row-x, 8px) 3px 4px;
+}
+
+.ct-reset-forecast-settings-header button {
+  display: grid;
+  place-items: center;
+  inline-size: 24px;
+  block-size: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--control-radius-md, 10px);
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.ct-reset-forecast-settings-header button:hover { background: var(--rf-hover); }
+
+.ct-reset-forecast-stale {
+  margin: 0 var(--padding-row-x, 8px) 3px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  background: var(--rf-hover);
+  font-size: .885em;
+}
+
+.ct-reset-forecast-panel [data-notice] { font-weight: 550; }
+
+.ct-reset-forecast-separator {
+  padding: var(--app-menu-separator-gutter, calc(var(--spacing, 4px) * 1.5))
+    var(--app-menu-separator-inset, var(--padding-row-x, 8px));
+}
+
+.ct-reset-forecast-separator::after {
+  display: block;
+  block-size: 1px;
+  background: var(--color-border, var(--menu-separator-background-color, transparent));
+  content: "";
+}
+
+.ct-reset-forecast-windows,
+.ct-reset-forecast-row dd { margin: 0; }
+
+.ct-reset-forecast-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--menu-item-gap, 6px);
+  padding: var(--menu-item-padding, 5px 8px);
+  color: inherit;
+}
+
+.ct-reset-forecast-row dd { padding-inline-end: var(--spacing, 4px); }
+
+.ct-reset-forecast-panel[data-status="stale"] dd { color: var(--rf-muted); }
+
+.ct-reset-forecast-panel .ct-reset-forecast-action {
+  border-radius: var(--control-radius-xl, 15px);
+  text-decoration: none;
+}
+
+.ct-reset-forecast-action:hover,
+.ct-reset-forecast-action:focus-visible { background: var(--rf-hover); }
+
+.ct-reset-forecast-panel button.ct-reset-forecast-action {
+  inline-size: 100%;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.ct-reset-forecast-panel button.ct-reset-forecast-action:hover,
+.ct-reset-forecast-panel button.ct-reset-forecast-action:focus-visible,
+.ct-reset-forecast-option:hover,
+.ct-reset-forecast-option:has(input:checked) { background: var(--rf-hover); }
+
+.ct-reset-forecast-panel button:focus-visible {
+  outline: 2px solid var(--rf-focus);
+  outline-offset: -2px;
+}
+
+.ct-reset-forecast-options {
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.ct-reset-forecast-option {
+  position: relative;
+  align-items: center;
+  border-radius: var(--control-radius-xl, 15px);
+  cursor: pointer;
+}
+
+.ct-reset-forecast-option input {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: 0;
+  opacity: 0;
+}
+
+.ct-reset-forecast-option:has(input:focus-visible) {
+  outline: 2px solid var(--rf-focus);
+  outline-offset: -2px;
+}
+
+.ct-reset-forecast-check {
+  visibility: hidden;
+  padding-inline-end: var(--spacing, 4px);
+}
+
+.ct-reset-forecast-option input:checked + .ct-reset-forecast-check { visibility: visible; }

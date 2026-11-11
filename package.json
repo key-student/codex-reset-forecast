@@ -1,0 +1,30 @@
+{
+  "name": "ct-reset-forecast",
+  "version": "0.1.7",
+  "description": "在 Codex 左下角显示额外额度重置的社区预测和公开预告。",
+  "type": "module",
+  "license": "MIT",
+  "keywords": [
+    "codex-tweaks-package",
+    "codex-tweaks-node"
+  ],
+  "engines": {
+    "node": ">=20.3.0"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "codexTweaks": {
+    "apiVersion": 3,
+    "entrypoints": {
+      "renderer": "src/index.js",
+      "node": "src/node.js"
+    },
+    "priority": 100,
+    "permissions": {
+      "node": {
+        "reason": "向 codex.gussuriworks.com 读取公开重置预测。上游接口未开放浏览器跨域访问，因此由本机 Node 发起固定地址的无凭据 HTTPS 请求，预测结果仅缓存于内存，侧栏显示时段保存在本功能包的数据目录。"
+      }
+    }
+  }
+}
