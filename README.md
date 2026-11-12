@@ -8,7 +8,7 @@
 [![Node.js 22+](https://img.shields.io/badge/Node.js-22%2B-2B795C?style=flat-square&logo=node.js&logoColor=white)](#requirements)
 [![Install from source](https://img.shields.io/badge/Install-Source-2470B5?style=flat-square)](#installation)
 [![MIT License](https://img.shields.io/badge/License-MIT-6755BE?style=flat-square)](LICENSE)
-[![GitHub Stars](https://img.shields.io/github/stars/key-student/codex-tweaks-reset-forecast?style=flat-square&label=Stars&logo=github&logoColor=white&color=A15E2A)](https://github.com/key-student/codex-tweaks-reset-forecast/stargazers)
+[![GitHub Stars](https://img.shields.io/github/stars/key-student/codex-reset-forecast?style=flat-square&label=Stars&logo=github&logoColor=white&color=A15E2A)](https://github.com/key-student/codex-reset-forecast/stargazers)
 
 <img src="docs/readme-hero-en.webp" width="100%" alt="Codex extra reset forecast. The illustration shows a 48-hour forecast alongside the built-in Usage indicator and probability estimates for the next 12, 24, 48, and 72 hours.">
 
@@ -22,7 +22,7 @@ Check the [requirements](#requirements) before installing.
 
 ### Download the ZIP
 
-1. [Download the source ZIP](https://github.com/key-student/codex-tweaks-reset-forecast/archive/refs/heads/main.zip) and extract it.
+1. [Download the source ZIP](https://github.com/key-student/codex-reset-forecast/archive/refs/heads/main.zip) and extract it.
 2. Open Terminal, type `cd ` (with a trailing space), drag the extracted project folder into Terminal, and press Return.
 3. Run the installation command.
 
@@ -35,8 +35,8 @@ The installer runs under your macOS user account and needs no `sudo`.
 ### Install with Git
 
 ```bash
-git clone https://github.com/key-student/codex-tweaks-reset-forecast.git
-cd codex-tweaks-reset-forecast
+git clone https://github.com/key-student/codex-reset-forecast.git
+cd codex-reset-forecast
 bash standalone/install.sh install
 ```
 
@@ -99,11 +99,11 @@ The forecast process reads the public Codex Reset Observatory API without an API
 
 ## Star History
 
-<a href="https://star-history.com/#key-student/codex-tweaks-reset-forecast&amp;Date">
+<a href="https://star-history.com/#key-student/codex-reset-forecast&amp;Date">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=key-student/codex-tweaks-reset-forecast&amp;type=Date&amp;theme=dark">
-    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=key-student/codex-tweaks-reset-forecast&amp;type=Date">
-    <img src="https://api.star-history.com/svg?repos=key-student/codex-tweaks-reset-forecast&amp;type=Date" alt="GitHub stars for this repository over time" width="680">
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=key-student/codex-reset-forecast&amp;type=Date&amp;theme=dark">
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=key-student/codex-reset-forecast&amp;type=Date">
+    <img src="https://api.star-history.com/svg?repos=key-student/codex-reset-forecast&amp;type=Date" alt="GitHub stars for this repository over time" width="680">
   </picture>
 </a>
 

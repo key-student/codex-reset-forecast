@@ -8,7 +8,7 @@
 [![Node.js 22+](https://img.shields.io/badge/Node.js-22%2B-2B795C?style=flat-square&logo=node.js&logoColor=white)](#系统要求)
 [![源码安装](https://img.shields.io/badge/%E5%AE%89%E8%A3%85-%E6%BA%90%E7%A0%81-2470B5?style=flat-square)](#安装)
 [![MIT 许可证](https://img.shields.io/badge/License-MIT-6755BE?style=flat-square)](LICENSE)
-[![GitHub Stars](https://img.shields.io/github/stars/key-student/codex-tweaks-reset-forecast?style=flat-square&label=Stars&logo=github&logoColor=white&color=A15E2A)](https://github.com/key-student/codex-tweaks-reset-forecast/stargazers)
+[![GitHub Stars](https://img.shields.io/github/stars/key-student/codex-reset-forecast?style=flat-square&label=Stars&logo=github&logoColor=white&color=A15E2A)](https://github.com/key-student/codex-reset-forecast/stargazers)
 
 <img src="docs/readme-hero-zh.webp" width="100%" alt="Codex 额外重置预测。示意图展示侧栏常驻的 48 小时预测与原生用量并排，以及未来 12、24、48、72 小时的概率详情。">
 
@@ -22,7 +22,7 @@
 
 ### 下载 ZIP
 
-1. [下载源码 ZIP](https://github.com/key-student/codex-tweaks-reset-forecast/archive/refs/heads/main.zip) 并解压。
+1. [下载源码 ZIP](https://github.com/key-student/codex-reset-forecast/archive/refs/heads/main.zip) 并解压。
 2. 打开「终端」，输入 `cd `（末尾留一个空格），把解压后的项目文件夹拖进终端，再按回车。
 3. 在终端运行安装命令。
 
@@ -35,8 +35,8 @@ bash standalone/install.sh install
 ### 使用 Git
 
 ```bash
-git clone https://github.com/key-student/codex-tweaks-reset-forecast.git
-cd codex-tweaks-reset-forecast
+git clone https://github.com/key-student/codex-reset-forecast.git
+cd codex-reset-forecast
 bash standalone/install.sh install
 ```
 
@@ -99,11 +99,11 @@ bash standalone/install.sh uninstall
 
 ## Star 趋势
 
-<a href="https://star-history.com/#key-student/codex-tweaks-reset-forecast&amp;Date">
+<a href="https://star-history.com/#key-student/codex-reset-forecast&amp;Date">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=key-student/codex-tweaks-reset-forecast&amp;type=Date&amp;theme=dark">
-    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=key-student/codex-tweaks-reset-forecast&amp;type=Date">
-    <img src="https://api.star-history.com/svg?repos=key-student/codex-tweaks-reset-forecast&amp;type=Date" alt="本仓库 GitHub Star 数随时间的变化" width="680">
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=key-student/codex-reset-forecast&amp;type=Date&amp;theme=dark">
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=key-student/codex-reset-forecast&amp;type=Date">
+    <img src="https://api.star-history.com/svg?repos=key-student/codex-reset-forecast&amp;type=Date" alt="本仓库 GitHub Star 数随时间的变化" width="680">
   </picture>
 </a>
 
