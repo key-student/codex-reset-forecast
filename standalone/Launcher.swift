@@ -50,6 +50,12 @@ final class Launcher {
             source.resume()
             signals.append(source)
         }
+
+        // At login, macOS may restore Codex before launchd starts this helper.
+        let running = apps
+        if running.count == 1, let app = running.first {
+            didLaunch(app, alreadyRunning: true)
+        }
     }
 
     private var apps: [NSRunningApplication] {
@@ -61,7 +67,7 @@ final class Launcher {
             app.bundleURL?.resolvingSymlinksInPath().path == appURL.path
     }
 
-    private func didLaunch(_ app: NSRunningApplication) {
+    private func didLaunch(_ app: NSRunningApplication, alreadyRunning: Bool = false) {
         guard matches(app), !starting, !stopping, child == nil else { return }
         starting = true
         Task {
@@ -69,7 +75,7 @@ final class Launcher {
                 starting = false
                 if stopping { CFRunLoopStop(CFRunLoopGetMain()) }
             }
-            await handoff(app)
+            await handoff(app, alreadyRunning: alreadyRunning)
         }
     }
 
@@ -94,9 +100,9 @@ final class Launcher {
             URL(fileURLWithPath: executable).resolvingSymlinksInPath().path
     }
 
-    private func eligible(_ app: NSRunningApplication, since launch: Date) -> Bool {
+    private func eligible(_ app: NSRunningApplication, since launch: Date, maximumAge: TimeInterval) -> Bool {
         let age = Date().timeIntervalSince(launch)
-        return age >= 0 && age <= 8 && idleTime() >= age &&
+        return age >= 0 && age <= maximumAge && idleTime() >= age &&
             apps.count == 1 && apps.first?.processIdentifier == app.processIdentifier
     }
 
@@ -139,15 +145,24 @@ final class Launcher {
         return read == 0 && port >= 49152 ? port : nil
     }
 
-    private func handoff(_ app: NSRunningApplication) async {
+    private func handoff(_ app: NSRunningApplication, alreadyRunning: Bool) async {
         guard let launch = app.launchDate else { return }
-        while !stopping && eligible(app, since: launch) && (!app.isFinishedLaunching || !app.isActive) {
+        let maximumAge: TimeInterval = alreadyRunning ? 120 : 8
+        func canHandOff() -> Bool {
+            !stopping && eligible(app, since: launch, maximumAge: maximumAge)
+        }
+        func isReady() -> Bool {
+            app.isFinishedLaunching && (alreadyRunning || app.isActive)
+        }
+
+        while canHandOff() && !isReady() {
             try? await Task.sleep(for: .milliseconds(150))
         }
-        guard !stopping, eligible(app, since: launch), app.isFinishedLaunching, app.isActive,
+        guard canHandOff(), isReady(),
               unmodifiedLaunch(app), let port = freePort(), reserveAttempt(),
-              eligible(app, since: launch), app.isActive else { return }
+              canHandOff(), isReady() else { return }
 
+        let wasActive = app.isActive
         let quitAt = Date()
         guard app.terminate() else { return }
         let deadline = quitAt.addingTimeInterval(10)
@@ -157,7 +172,7 @@ final class Launcher {
         guard app.isTerminated, apps.isEmpty else { return }
 
         if stopping {
-            _ = await openCodex([])
+            _ = await openCodex([], activates: wasActive)
             return
         }
 
@@ -167,20 +182,20 @@ final class Launcher {
            matches(opened) {
             guard !stopping else { return }
             startAgent(pid: pid, port: port)
-            if idleTime() >= Date().timeIntervalSince(quitAt),
+            if wasActive, idleTime() >= Date().timeIntervalSince(quitAt),
                workspace.frontmostApplication?.processIdentifier == frontmostPID {
                 _ = opened.activate()
             }
         } else if apps.isEmpty {
             NSLog("Codex Reset Forecast: reopening Codex without the forecast.")
-            _ = await openCodex([])
+            _ = await openCodex([], activates: wasActive)
         }
     }
 
-    private func openCodex(_ arguments: [String]) async -> pid_t? {
+    private func openCodex(_ arguments: [String], activates: Bool = false) async -> pid_t? {
         let configuration = NSWorkspace.OpenConfiguration()
         configuration.createsNewApplicationInstance = true
-        configuration.activates = arguments.isEmpty
+        configuration.activates = activates
         configuration.arguments = arguments
         return await withCheckedContinuation { continuation in
             workspace.openApplication(at: appURL, configuration: configuration) { app, _ in
