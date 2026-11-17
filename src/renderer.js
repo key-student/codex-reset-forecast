@@ -336,6 +336,9 @@ export function createRenderer({ DEFAULT_HORIZON, HORIZONS }) {
       closePanel(true);
     }, { ...listeners, capture: true });
     window.addEventListener("resize", positionPanel, listeners);
+    window.addEventListener("online", () => {
+      if (!document.hidden) void refresh();
+    }, listeners);
     document.addEventListener("visibilitychange", () => {
       if (!document.hidden) void refresh();
     }, listeners);

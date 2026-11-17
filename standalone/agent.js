@@ -1,4 +1,5 @@
 import { execFile } from "node:child_process";
+import { randomUUID } from "node:crypto";
 import { mkdir, readFile } from "node:fs/promises";
 import { setTimeout as delay } from "node:timers/promises";
 import { promisify } from "node:util";
@@ -12,10 +13,12 @@ const world = "Codex Reset Forecast";
 const methods = new Set(["forecast", "get-sidebar-hours", "set-sidebar-hours"]);
 const appURL = "app://-/index.html";
 const scope = "__ctResetForecastStandalone";
+const HEALTH_CHECK_INTERVAL = 30_000;
 
-function mount(css, createRenderer, preferences, binding, scope) {
+function mount(css, createRenderer, preferences, binding, scope, sessionId) {
   if (location.href.split(/[?#]/, 1)[0] !== "app://-/index.html" || !document.body) return false;
-  if (globalThis[scope]) return true;
+  if (globalThis[scope]?.sessionId === sessionId) return true;
+  globalThis[scope]?.dispose();
 
   const style = document.createElement("style");
   style.textContent = css;
@@ -25,7 +28,12 @@ function mount(css, createRenderer, preferences, binding, scope) {
   const cleanup = [];
   let sequence = 0;
 
-  globalThis[scope] = {
+  const bridge = globalThis[scope] = {
+    sessionId,
+    ping(heartbeat) {
+      globalThis[binding](JSON.stringify({ heartbeat }));
+      return true;
+    },
     settle(id, ok, value) {
       const request = pending.get(id);
       if (!request) return;
@@ -49,12 +57,12 @@ function mount(css, createRenderer, preferences, binding, scope) {
       invoke(method, params) {
         return new Promise((resolve, reject) => {
           const id = ++sequence;
-          const timer = setTimeout(() => globalThis[scope]?.settle(id, false), 12_000);
+          const timer = setTimeout(() => bridge.settle(id, false), 12_000);
           pending.set(id, { timer, resolve, reject });
           try {
             globalThis[binding](JSON.stringify({ id, method, hours: params?.hours }));
           } catch {
-            globalThis[scope].settle(id, false);
+            bridge.settle(id, false);
           }
         });
       },
@@ -71,6 +79,8 @@ function mount(css, createRenderer, preferences, binding, scope) {
 class Session {
   constructor(url, handlers) {
     this.handlers = handlers;
+    this.id = randomUUID();
+    this.bridge = `(globalThis.${scope}?.sessionId === ${JSON.stringify(this.id)} ? globalThis.${scope} : undefined)`;
     this.socket = new WebSocket(url);
     this.pending = new Map();
     this.sequence = 0;
@@ -97,6 +107,33 @@ class Session {
     this.context = executionContextId;
     await this.call("Runtime.addBinding", { name: binding, executionContextId });
     if (!await this.evaluate(source)) throw new Error("Codex document is loading");
+    this.nextHealthCheck = Date.now() + HEALTH_CHECK_INTERVAL;
+  }
+
+  async isHealthy() {
+    if (this.closed) return false;
+    if (Date.now() < this.nextHealthCheck) return true;
+    this.nextHealthCheck = Date.now() + HEALTH_CHECK_INTERVAL;
+
+    // Verify the renderer can send a binding event even if the socket still looks open.
+    const token = randomUUID();
+    let timer;
+    try {
+      const acknowledgment = new Promise(resolve => {
+        timer = setTimeout(resolve, 3000, false);
+        this.acknowledge = value => { if (value === token) resolve(true); };
+      });
+      const [evaluated, acknowledged] = await Promise.all([
+        this.evaluate(`${this.bridge}?.ping(${JSON.stringify(token)})`),
+        acknowledgment
+      ]);
+      return evaluated === true && acknowledged;
+    } catch {
+      return false;
+    } finally {
+      clearTimeout(timer);
+      this.acknowledge = null;
+    }
   }
 
   call(method, params = {}) {
@@ -135,10 +172,14 @@ class Session {
       if (this.context !== undefined) this.socket.close();
       return;
     }
-    if (message.method !== "Runtime.bindingCalled" || event.name !== binding ||
+    if (this.retiring || message.method !== "Runtime.bindingCalled" || event.name !== binding ||
       event.executionContextId !== this.context || event.payload.length > 256) return;
     let request;
     try { request = JSON.parse(event.payload); } catch { return; }
+    if (typeof request?.heartbeat === "string") {
+      this.acknowledge?.(request.heartbeat);
+      return;
+    }
     if (!Number.isSafeInteger(request?.id) || request.id <= 0 || !methods.has(request.method)) return;
 
     let ok = true;
@@ -146,15 +187,16 @@ class Session {
     try { value = await this.handlers.get(request.method)({ hours: request.hours }); }
     catch { ok = false; }
     try {
-      await this.evaluate(`globalThis.${scope}?.settle(${request.id}, ${ok}, ${JSON.stringify(value ?? null)})`);
+      await this.evaluate(`${this.bridge}?.settle(${request.id}, ${ok}, ${JSON.stringify(value ?? null)})`);
     } catch {
       this.socket.close();
     }
   }
 
   async close() {
+    this.retiring = true;
     if (this.context !== undefined && !this.closed) {
-      await this.evaluate(`globalThis.${scope}?.dispose()`).catch(() => {});
+      await this.evaluate(`${this.bridge}?.dispose()`).catch(() => {});
     }
     this.socket.close();
   }
@@ -182,7 +224,7 @@ function targetURL(target, port) {
 async function run(pid, port, dataDirectory) {
   await mkdir(dataDirectory, { recursive: true, mode: 0o700 });
   const css = await readFile(new URL("../src/style.css", import.meta.url), "utf8");
-  const source = `(${mount})(${JSON.stringify(css)}, ${createRenderer}, ${JSON.stringify({ DEFAULT_HORIZON, HORIZONS })}, ${JSON.stringify(binding)}, ${JSON.stringify(scope)})`;
+  const mountSource = sessionId => `(${mount})(${JSON.stringify(css)}, ${createRenderer}, ${JSON.stringify({ DEFAULT_HORIZON, HORIZONS })}, ${JSON.stringify(binding)}, ${JSON.stringify(scope)}, ${JSON.stringify(sessionId)})`;
   const stop = new AbortController();
   process.once("SIGTERM", () => stop.abort());
   process.once("SIGINT", () => stop.abort());
@@ -194,7 +236,7 @@ async function run(pid, port, dataDirectory) {
       handle(name, handler) { handlers.set(name, handler); },
       emit(_name, hours) {
         for (const session of sessions.values()) {
-          void session.evaluate(`globalThis.${scope}?.emit(${JSON.stringify(hours)})`).catch(() => {});
+          void session.evaluate(`${session.bridge}?.emit(${JSON.stringify(hours)})`).catch(() => {});
         }
       }
     }
@@ -216,17 +258,17 @@ async function run(pid, port, dataDirectory) {
             const url = targetURL(target, port);
             return url ? [[target.id, url]] : [];
           }));
-          for (const [id, session] of sessions) {
-            if (session.closed || !urls.has(id)) {
+          await Promise.all([...sessions].map(async ([id, session]) => {
+            if (!urls.has(id) || !await session.isHealthy()) {
               sessions.delete(id);
               await session.close();
             }
-          }
+          }));
           await Promise.all([...urls].map(async ([id, url]) => {
             if (sessions.has(id) || stop.signal.aborted) return;
             const session = new Session(url, handlers);
             try {
-              await session.start(source);
+              await session.start(mountSource(session.id));
               sessions.set(id, session);
             } catch {
               await session.close();

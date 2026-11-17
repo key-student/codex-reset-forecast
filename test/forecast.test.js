@@ -70,7 +70,7 @@ test("validates probabilities and includes only active official notices", () => 
   assert.throws(() => readSnapshot({ ...result, viewModel: {} }), /unavailable/);
 });
 
-test("shares in-flight refreshes, caches the response, and marks old data stale", async t => {
+test("shares in-flight refreshes, caches the response, and recovers after going offline", async t => {
   const { handlers } = await createRuntime(t);
   const time = new Date("2026-01-01T00:00:00Z").getTime();
   const fetch = t.mock.method(globalThis, "fetch", async () => ({
@@ -93,6 +93,17 @@ test("shares in-flight refreshes, caches the response, and marks old data stale"
   fetch.mock.mockImplementation(async () => { throw new Error("offline"); });
   assert.deepEqual(await request(), { snapshot: first.snapshot, status: "stale" });
   assert.equal(fetch.mock.callCount(), 2);
+
+  const recoveredAt = new Date(time + 32 * 60_000).toISOString();
+  fetch.mock.mockImplementation(async () => ({ ok: true, json: async () => payload(recoveredAt) }));
+  now.mock.mockImplementation(() => Date.parse(recoveredAt) - 1);
+  assert.equal((await request()).status, "stale");
+  assert.equal(fetch.mock.callCount(), 2);
+  now.mock.mockImplementation(() => Date.parse(recoveredAt));
+  const recovered = await request();
+  assert.equal(recovered.status, "current");
+  assert.equal(recovered.snapshot.observedAt, recoveredAt);
+  assert.equal(fetch.mock.callCount(), 3);
 });
 
 test("loads saved settings and serializes updates to the selected horizon", async t => {
